@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <link rel="icon" type="image/svg+xml" href="/favicon.png" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Codex - Your Coding AI</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script> <!-- Include jQuery -->
+</head>
+
+<body>
+    <div id="app">
+        <div id="chat_container"></div>
+        <form id="prompt_form">
+            <textarea id="prompt" name="prompt" required rows="1" cols="1" placeholder="Ask Codex..."></textarea>
+            <button type="submit"><img src="{{ url_for('static', filename='assets/send.jpg') }}" /></button>
+        </form>
+    </div>
+
+    <script>
+        $(document).ready(function () {
+            // Intercept form submission
+            $('#prompt_form').submit(function (event) {
+                event.preventDefault(); // Prevent default form submission
+    
+                // Get the value of the prompt textarea
+                var promptText = $('#prompt').val();
+    
+                // Send AJAX request to Flask
+                $.ajax({
+                    url: '/prompt',
+                    type: 'POST',
+                    contentType: 'application/json', // Set content type to JSON
+                    data: JSON.stringify({ prompt: promptText }), // Stringify data
+                    success: function (response) {
+                        console.log(response);
+                        // Update chat container with bot's response
+                        $('#chat_container').append(`
+                        <div class="wrapper">
+                                <div class="chat">
+                                    <div class="profile">
+                                        <img src="{{ url_for('static', filename='assets/user.png') }}" alt="Profile Image" />
+                                    </div>
+                                    <div class="message">${response.user_chat.value}</div>
+                                </div>
+                            </div>
+                            <div class="wrapper">
+                                <div class="chat">
+                                    <div class="profile">
+                                        <img src="{{ url_for('static', filename='assets/bot.png') }}" alt="Profile Image" />
+                                    </div>
+                                    <div class="message">${response.bot_chat.value}</div>
+                                </div>
+                            </div>
+                        `);
+    
+                        // Clear prompt textarea
+                        $('#prompt').val('');
+                    },
+                    error: function (xhr, status, error) {
+                        // Handle errors
+                        console.error(xhr.responseText);
+                    }
+                });
+            });
+        });
+    </script>
+    
+</body>
+
+</html>
